@@ -1,4 +1,8 @@
-# Tauwerk MIDI Sequencer
+<div align="center">
+  <img src="tauwerk.svg" alt="Tauwerk Logo" width="300">
+  
+  # Tauwerk MIDI Sequencer
+</div>
 
 Low-latency MIDI sequencer for Raspberry Pi 5 with hardware control interface.
 
