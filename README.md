@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="tauwerk.svg" alt="Tauwerk Logo" width="300">
+  <img src="assets/images/tauwerk.svg" alt="Tauwerk Logo" width="300">
   
   # Tauwerk MIDI Sequencer
 </div>
