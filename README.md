@@ -76,7 +76,7 @@ out1.address = 0x3C
 
 - **Language**: All comments in German
 - **Indentation**: 2 spaces
-- **Philosophy**: "Make it work, make it fast, make it readable - in that order!"
+- **Philosophy**: "Make it work, make it fast, make it readable."
 
 ## System Requirements
 
