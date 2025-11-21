@@ -1,0 +1,103 @@
+2024-01-15 14:30
+- [DONE] Backup-Script erweitert um latest/-Kopie
+- [DONE] /history Command für KI-Partner definiert
+- [DECISION] Getrennte Dateien: context.txt (statisch) vs history.txt (dynamisch)
+- [DECISION] Pro Chat-Session = 1 Thema fokussieren
+- [BLOCKER] Token-Limits erfordern regelmäßige Session-Wechsel
+
+2024-01-15 14:35
+- [DECISION] MIDI über C++ raw ALSA (Python-Bindings zu instabil auf RPi5)
+- [DECISION] PyGame → DRM Migration für latenzfreies Touch-Interface
+
+2024-01-15 14:40
+- [BUG] hardware.json im GPIO-Treiber und device.py noch nicht ersetzt
+- [DONE] Tauwerk-Spezifik aus context.txt in history.txt migriert
+- [DONE] JSON aus C++ Treiber entfernt
+- [IN_PROGRESS] INI-basierte Hardware-Konfiguration etablieren
+- [DONE] Generischer INI-Parser für beliebige Controller implementiert
+- [IN_PROGRESS] C++ Treiber und Python an existierende hardware.ini angepasst
+- [DONE] GPIO Treiber produziert stabile Events
+
+2024-01-15 14:55
+- [DECISION] Separate Services: tauwerk_gpio.service (C++) + tauwerk.service (Python)
+
+2024-11-08 03:55
+- [DONE] Virtual Environment Setup in deployment integriert
+- [DONE] System startet sauber mit venv-Aktivierung
+- [DONE] Python Hauptapplikation läuft stabil im Loop
+- [IN_PROGRESS] Python Skripte optimieren
+
+2024-11-08 04:15
+- [DONE] GPIO komplett gefixt - Encoder, Buttons, OLEDs laufen in Echtzeit
+- [DONE] Framebuffer-Test erfolgreich (rotes Rechteck)
+- [DONE] Farbformat BGR identifiziert und korrigiert
+- [DONE] DRM-Treiber getestet (funktioniert nicht zuverlässig auf Pi5)
+- [DECISION] Framebuffer-Approach statt DRM für maximale Stabilität
+- [DONE] Pillow und evdev für Font-Rendering und Touch-Input installiert
+- [IN_PROGRESS] Touchbar UI in Haupt-App integrieren (PyGame komplett durch Framebuffer ersetzen)
+- [BLOCKER] Touchpad-Klasse muss Loop-Struktur anpassen für Main-Integration
+
+2024-11-08 05:15
+- [DONE] C++ Grafik-Treiber erfolgreich getestet - Shared Memory Kommunikation funktioniert perfekt
+- [DONE] Kernel Console Problem gelöst mit vt.global_cursor_default=0
+- [DECISION] C++ Komplett-Treiber statt getrennter Prozesse für maximale Performance
+- [BUG] Touch Events im neuen C++ Treiber werden nicht erkannt
+- [BLOCKER] Touch Device Detection in C++ muss gefixt werden
+- [NEXT] Touch Input Debugging und Portierung von Calibration/Multitouch in C++
+
+2024-11-08 05:45
+- [DECISION] LockFreeEngine bleibt KERNSTÜCK für MIDI/Clock Performance (0.1ms Latenz)
+- [DECISION] Shared Memory nur für UI ↔ Python Kommunikation (1.5-3ms Latenz - ausreichend)
+- [DECISION] Standard Shared Memory (Memory-Order Optimierung nur bei Bedarf)
+- [ARCHITECTURE] C++ UI → (1.5ms SM) → Python Logic → (0.1ms) → LockFreeEngine → (0.05ms) → MIDI Hardware
+- [NEXT] Komplette Shared Memory Bridge für UI-Kommunikation implementieren
+
+2024-11-11 21:48
+- [DONE] C++ Touchpad Driver mit Shared Memory Bridge implementiert
+- [DONE] Python UI Bridge für Kommunikation mit C++ Treiber
+- [DONE] Basic Touch-Input mit Single-Touch und Multitouch Support
+- [DONE] UI Elemente: Buttons, Fader, Labels
+- [DONE] Framebuffer Rendering (800x480)
+- [DONE] Touch-Koordinaten korrigiert: 0-799 X, 0-479 Y
+- [DONE] Collision Detection für UI Elemente
+- [DONE] Touch State Management (active/hovered touches)
+- [DONE] Multitouch Support implementiert
+- [DECISION] Multitouch hardcoded auf true für FT5x06 Panel
+- [BUG] Fader haben spürbaren Lag bei Bewegung
+- [DONE] Performance Optimierungen: FPS Limiting auf 60 FPS, Python Loop auf 1000 FPS, Event Deduplication
+
+2024-11-13 12:14
+- [DONE] Multitouch Implementation und Device Detection korrigiert
+- [BLOCKER] Fader Lag bei Bewegung (erneut)
+
+2024-11-14 07:37
+- [DONE] C++ Touch UI Driver komplett neu implementiert mit eigenständigem Rendering
+- [DONE] Double Buffering für flackern-freies Rendering integriert
+- [DONE] Time-based Animation für Smoothness
+- [DONE] Shared Memory Bridge für asynchrone Python-Kommunikation
+
+2025-11-19 09:20
+- [IN_PROGRESS] DSI Display Integration auf Raspberry Pi (Display wird nicht erkannt)
+- [DONE] Grundlegende Diagnostik mit modetest (zeigt nur HDMI)
+- [BUG] DSI-Interface nicht initialisiert
+- [BLOCKER] DSI Device Tree Overlay fehlt
+- [DONE] DSI-Aktivierung über /boot/config.txt erfolgreich
+- [DONE] DSI Display Integration erfolgreich abgeschlossen! 🎉
+- [DONE] Hardware-beschleunigtes Rendering mit OpenGL ES 2.0 funktioniert (Blauer Testscreen)
+- [DONE] Alle DRM-Devices (card0=v3d, card1=drm-rp1-dsi, card2=vc4) korrekt erkannt
+- [DECISION] Moderne Graphics Stack gewählt: DRM/KMS + GBM + EGL/OpenGL ES 2.0
+- [DECISION] Device Priority für Multi-Display: card1 (DSI) → card2 (VC4/HDMI) → card0 (V3D)
+- [BLOCKER] Keine aktuellen Blocker! ✅ Display-Stack vollständig funktionsfähig
+
+2024-11-20 22:30
+- [DONE] Komplettes OOP Refactoring: Monolithische test.cpp in saubere Architektur aufgeteilt
+- [DONE] Neue Ordnerstruktur: src/core/, src/widgets/, src/input/
+- [DONE] Widget Base Class, Label, Fader, Button Widgets, Layout Manager, Renderer Class, TouchManager implementiert
+- [DONE] Main loop von 150+ auf ~20 Zeilen reduziert
+- [DONE] Performance beibehalten (Adaptive 10/60 FPS, GPU-beschleunigtes Dithering)
+- [DONE] Makefile TAB-Problem gelöst
+- [DECISION] test.cpp wird zu tauwerk_touchpad.cpp (OOP-Architektur ist die neue Basis)
+- [BUG] Keine bekannten Bugs nach Refactoring
+- [NEXT] Erweiterte Touch-Areas für Widgets implementieren (Touch-Reservation, Drag-Support)
+- [NEXT] Button Widget verbessern (Velocity/Pressure Support prüfen, Scale-Animation)
+- [NEXT] Weitere UI Widgets planen (Knob, VU Meter, Multi-Page Layout System)

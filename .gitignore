@@ -1,0 +1,52 @@
+# Compiled binaries
+bin/
+*.o
+*.so
+*.a
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# Logs
+logs/
+*.log
+
+# System
+.DS_Store
+.vscode/
+.vscode-server/
+.idea/
+.wget-hsts
+
+# Backups (keep structure, not content)
+backups/config/*/
+
+# Shared memory (runtime)
+/dev/shm/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Hardware specific
+.hardware_cache
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+*~
+
+# Config backups (keep hardware.ini)
+config/*.backup
+
+# Project-specific excludes
+readme.txt

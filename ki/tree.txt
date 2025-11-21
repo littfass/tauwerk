@@ -1,0 +1,78 @@
+.
+├── ./app
+│   ├── ./app/display.py
+│   ├── ./app/hardware.py
+│   ├── ./app/main.py
+│   ├── ./app/midi.py
+│   ├── ./app/old_main.py
+│   ├── ./app/old_touchpad.py
+│   ├── ./app/test_graphics.py
+│   ├── ./app/touchpad.py
+│   └── ./app/ui.py
+├── ./assets
+│   └── ./assets/fonts
+│       └── ./assets/fonts/ds_digital
+│           ├── ./assets/fonts/ds_digital/DIGITAL.TXT
+│           ├── ./assets/fonts/ds_digital/ds_digi_bold_original.ttf
+│           ├── ./assets/fonts/ds_digital/ds_digi_bold.ttf
+│           ├── ./assets/fonts/ds_digital/ds_digi_italic.ttf
+│           ├── ./assets/fonts/ds_digital/ds_digi.ttf
+│           └── ./assets/fonts/ds_digital/ds_digit.ttf
+├── ./bin
+│   ├── ./bin/tauwerk_gpio_driver
+│   ├── ./bin/tauwerk_touchpad_driver
+│   ├── ./bin/test
+│   └── ./bin/test_gpu
+├── ./build.sh
+├── ./config
+│   └── ./config/hardware.ini
+├── ./deploy.sh
+├── ./ki
+│   ├── ./ki/commands.txt
+│   ├── ./ki/context.txt
+│   ├── ./ki/history.txt
+│   └── ./ki/tree.txt
+├── ./logs
+│   └── ./logs/gpio_driver.log
+├── ./Makefile
+├── ./readme.txt
+├── ./requirements.txt
+├── ./scripts
+│   ├── ./scripts/backup.sh
+│   ├── ./scripts/check_dsi.sh
+│   ├── ./scripts/configure.sh
+│   ├── ./scripts/restore.sh
+│   ├── ./scripts/services.sh
+│   ├── ./scripts/setup.sh
+│   └── ./scripts/tree.sh
+├── ./src
+│   ├── ./src/core
+│   │   ├── ./src/core/Backlight.h
+│   │   ├── ./src/core/Renderer.cpp
+│   │   ├── ./src/core/Renderer.h
+│   │   └── ./src/core/Types.h
+│   ├── ./src/input
+│   │   ├── ./src/input/TouchArea.h
+│   │   ├── ./src/input/TouchManager.cpp
+│   │   ├── ./src/input/TouchManager.h
+│   │   └── ./src/input/TouchSlot.h
+│   ├── ./src/main.cpp
+│   ├── ./src/tauwerk_gpio_driver.cpp
+│   ├── ./src/tauwerk_touchpad_driver.cpp
+│   ├── ./src/tauwerk_touchpad_driver_working.cpp
+│   ├── ./src/test.cpp
+│   ├── ./src/test.cpp.backup
+│   └── ./src/widgets
+│       ├── ./src/widgets/Button.cpp
+│       ├── ./src/widgets/Button.h
+│       ├── ./src/widgets/Fader.cpp
+│       ├── ./src/widgets/Fader.h
+│       ├── ./src/widgets/Label.cpp
+│       ├── ./src/widgets/Label.h
+│       ├── ./src/widgets/Layout.cpp
+│       ├── ./src/widgets/Layout.h
+│       └── ./src/widgets/Widget.h
+├── ./start.sh
+└── ./stop.sh
+
+14 directories, 62 files

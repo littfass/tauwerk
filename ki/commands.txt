@@ -1,0 +1,42 @@
+CUSTOM COMMANDS FÜR KI-PARTNER:
+
+/context [filename]          # Spezifische Datei besprechen
+/architecture [component]    # Architektur eines Components
+/performance [section]       # Performance-kritischen Code analysieren
+
+/todo [task]                 # Aktuelle Aufgabe definieren
+/problem [beschreibung]      # Problem schildern + Code-Ausschnitte
+/review [code]               # Code Review anfordern
+/optimize [section]          # Performance-Optimierung vorschlagen
+
+/midi [implementation]       # MIDI-spezifische Fragen
+/hardware [component]        # Hardware-Komponenten (GPIO, OLED, Encoder)
+/latency [issue]             # Latenz-Probleme analysieren
+/driver [cpp_code]           # C++ Treiber-Code besprechen
+
+/decision [options]          # Entscheidungshilfe bei Alternativen
+/alternative [approach]      # Alternative Implementierungswege
+/simple [complex_code]       # Vereinfachung von komplexem Code
+/complex [simple_code]       # Performance-optimierte komplexe Lösung
+
+/bug [description]           # Bug beschreiben
+/log [output]                # Log-Analyse
+/trace [issue]               # Problem-Nachverfolgung
+
+/history [context]           # Chat-Verlauf archivieren
+  - Beschreibung:
+    Erstellt oder aktualisiert die history.txt mit allen aktuellen Tasks, Entscheidungen und Blockern aus diesem Chat.
+  - Format:
+    YYYY-MM-DD HH:MM
+    - [DONE] Was erledigt wurde
+    - [BUG] Aktuelle Bugs
+    - [NEXT] Nächste Tasks  
+    - [DECISION] Wichtige Entscheidungen
+    - [IN_PROGRESS] Laufende Arbeiten
+    - [BLOCKER] Was blockiert
+  - Bei /history Auftrag:
+    1) Sammle alle relevanten Punkte aus diesem Chat
+    2) Gruppiere nach Kategorien (DONE/BUG/NEXT/etc.)
+    3) Verwende exakt das obige Format mit Timestamp
+    4) Füge neue Einträge zur history.txt hinzu (nicht ersetzen!)
+    5) Bestätige mit "History aktualisiert: [Anzahl] Einträge"
