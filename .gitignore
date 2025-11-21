@@ -50,3 +50,4 @@ config/*.backup
 
 # Project-specific excludes
 readme.txt
+ki/context.txt
