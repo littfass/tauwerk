@@ -1,10 +1,10 @@
 <div align="center">
   <img src="assets/images/tauwerk.svg" alt="Tauwerk Logo" width="300">
   
-  # Tauwerk MIDI Sequencer
+  # Building custom music gear.
+  
+  Low-latency MIDI sequencer for Raspberry Pi 5 with hardware control interface.
 </div>
-
-Low-latency MIDI sequencer for Raspberry Pi 5 with hardware control interface.
 
 ## Features
 
