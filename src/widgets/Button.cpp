@@ -1,5 +1,7 @@
 #include "Button.h"
 #include "../core/Renderer.h"
+#include <algorithm>
+#include <iostream>
 
 Button::Button(float x, float y, float w, float h, const std::string& txt, ButtonMode m)
     : Widget(x, y, w, h), text(txt), is_pressed(false), latch_state(false),
@@ -48,51 +50,68 @@ void Button::draw(Renderer& renderer) {
     }
 }
 
-bool Button::handle_touch(int tx, int ty, bool down) {
+bool Button::handle_touch(int tx, int ty, bool down, int touch_id) {
     if (!visible) return false;
     
-    if (mode == ButtonMode::MOMENTARY) {
-        if (down && !is_pressed) {
-            is_pressed = true;
-            dirty = true;
-            return true;
-        }
-        
-        if (down && is_pressed) {
-            return true;
-        }
-        
-        if (!down && is_pressed) {
-            is_pressed = false;
-            dirty = true;
-            
-            if (is_inside(tx, ty) && on_click) {
-                on_click();
-            }
-            return true;
-        }
-    } 
-    else if (mode == ButtonMode::LATCH) {
-        if (down && !is_pressed) {
-            is_pressed = true;
-            latch_state = !latch_state;
-            dirty = true;
-            
-            if (on_click) {
-                on_click();
-            }
-            return true;
-        }
-        
-        if (down && is_pressed) {
-            return true;
-        }
-        
-        if (!down && is_pressed) {
-            is_pressed = false;
-            return true;
-        }
+    // Check if this touch is already tracked
+    auto it = std::find(active_touches.begin(), active_touches.end(), touch_id);
+    bool is_tracked = (it != active_touches.end());
+    
+    // DEBUG: Print touch info
+    std::cout << "BTN[" << text << "] touch: (" << tx << "," << ty << ") down=" << down 
+              << " id=" << touch_id << " tracked=" << is_tracked 
+              << " stack_before=" << active_touches.size();
+    
+    // Remember state BEFORE modification
+    bool was_pressed = !active_touches.empty();
+    
+    // ═══════════════════════════════════════════════════════════
+    // UPDATE FINGER STACK
+    // ═══════════════════════════════════════════════════════════
+    if (down && !is_tracked) {
+        // TOUCH DOWN or MOVE - Add finger to stack
+        active_touches.push_back(touch_id);
+    } else if (!down && is_tracked) {
+        // TOUCH UP - Remove finger from stack
+        active_touches.erase(it);
+    } else if (down && is_tracked) {
+        // TOUCH MOVE - Already tracked, nothing to do
+        return true;
+    } else {
+        // Not our touch
+        return false;
     }
     
-    return false;
+    // ═══════════════════════════════════════════════════════════
+    // STATE CHANGE DETECTION
+    // ═══════════════════════════════════════════════════════════
+    bool is_now_pressed = !active_touches.empty();
+    
+    if (was_pressed != is_now_pressed) {
+        dirty = true;
+        std::cout << " -> STATE_CHANGE: " << (is_now_pressed ? "PRESSED" : "RELEASED") << std::endl;
+        
+        if (is_now_pressed) {
+            // Transition: RELEASED → PRESSED (onPress)
+            is_pressed = true;
+            
+            if (mode == ButtonMode::LATCH) {
+                latch_state = !latch_state;
+                if (on_click) {
+                    on_click();
+                }
+            }
+        } else {
+            // Transition: PRESSED → RELEASED (onRelease)
+            is_pressed = false;
+            
+            if (mode == ButtonMode::MOMENTARY && on_click) {
+                on_click();
+            }
+        }
+    } else {
+        std::cout << " -> no state change" << std::endl;
+    }
+    
+    return true;
 }

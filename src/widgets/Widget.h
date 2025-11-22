@@ -7,7 +7,7 @@ protected:
     float x, y, width, height;
     bool visible;
     bool dirty;
-    static constexpr int touch_buffer = 5;  // ← NEU! Fixed 5px buffer
+    static constexpr int touch_buffer = 10;  // ← 10px buffer for finger touch
     
 public:
     Widget(float x, float y, float w, float h) 
@@ -17,15 +17,15 @@ public:
     
     virtual void update(float dt) {}
     virtual void draw(Renderer& renderer) = 0;
-    virtual bool handle_touch(int tx, int ty, bool down) { return false; }
+    virtual bool handle_touch(int tx, int ty, bool down, int touch_id) { return false; }
     
     // ← NEU! Simple touch area mit 5px buffer
     bool is_in_touch_area(int tx, int ty) const {
         return visible && 
                tx >= x - touch_buffer && 
-               tx < x + width + touch_buffer &&
+               tx <= x + width + touch_buffer &&
                ty >= y - touch_buffer && 
-               ty < y + height + touch_buffer;
+               ty <= y + height + touch_buffer;
     }
     
     // Für Checks ob innerhalb Widget (ohne buffer)

@@ -23,6 +23,9 @@ private:
     float dither_alpha;
     std::function<void()> on_click;
     
+    // Multitouch: Track active fingers
+    std::vector<int> active_touches;
+    
 public:
     Button(float x, float y, float w, float h, const std::string& txt = "", 
            ButtonMode mode = ButtonMode::MOMENTARY);
@@ -38,5 +41,5 @@ public:
     bool can_release_on_leave() const { return true; }
     
     void draw(Renderer& renderer) override;
-    bool handle_touch(int tx, int ty, bool down) override;
+    bool handle_touch(int tx, int ty, bool down, int touch_id) override;
 };

@@ -43,7 +43,7 @@ int main() {
     
     auto* value_label = ui.add_widget<Label>(370, 190, "50%", Color(1, 1, 1, 1));
     
-    auto* perf_label = ui.add_widget<Label>(50, 380, "16.6 ms", Color(0.7f, 0.7f, 0.7f, 1));
+    auto* perf_label = ui.add_widget<Label>(650, 50, "16.6 ms", Color(0.7f, 0.7f, 0.7f, 1));
     
     auto* mode_label = ui.add_widget<Label>(50, 430, "Touch anywhere!", Color(1, 1, 1, 1));
     

@@ -63,10 +63,12 @@ void TouchManager::process_multitouch_event(const struct input_event& ev,
             case ABS_MT_TRACKING_ID:
                 if (current_slot < touch_slots.size()) {
                     if (ev.value == -1) {
+                        touch_slots[current_slot].last_tracking_id = touch_slots[current_slot].tracking_id;
                         touch_slots[current_slot].tracking_id = -1;
                         touch_slots[current_slot].pending_release = true;
                     } else {
                         touch_slots[current_slot].tracking_id = ev.value;
+                        touch_slots[current_slot].last_tracking_id = ev.value;
                         touch_slots[current_slot].pending_touch = true;
                     }
                 }
@@ -109,13 +111,13 @@ void TouchManager::process_complete_touch_frame(std::vector<std::unique_ptr<Widg
             ts.pending_touch = false;
             ts.has_position = false;
             
-            if (!ts.down_sent && ts.reserved_widget == nullptr) {
+            if (!ts.down_sent) {
                 ts.down_sent = true;
                 
-                // ← NEU! Simple 5px buffer check
+                // Try to claim a widget (multiple slots can share same widget now!)
                 for (auto it = widgets.rbegin(); it != widgets.rend(); ++it) {
                     if ((*it)->is_in_touch_area(scaled_x, scaled_y)) {
-                        if ((*it)->handle_touch(scaled_x, scaled_y, true)) {
+                        if ((*it)->handle_touch(scaled_x, scaled_y, true, ts.tracking_id)) {
                             ts.reserved_widget = it->get();
                             break;
                         }
@@ -128,7 +130,7 @@ void TouchManager::process_complete_touch_frame(std::vector<std::unique_ptr<Widg
         // ═══════════════════════════════════════════════════════════
         else if (ts.pending_release && ts.tracking_id == -1) {
             if (ts.active && ts.reserved_widget) {
-                ts.reserved_widget->handle_touch(ts.last_valid_x, ts.last_valid_y, false);
+                ts.reserved_widget->handle_touch(ts.last_valid_x, ts.last_valid_y, false, ts.last_tracking_id);
                 ts.reserved_widget = nullptr;
             }
             ts.active = false;
@@ -145,7 +147,7 @@ void TouchManager::process_complete_touch_frame(std::vector<std::unique_ptr<Widg
             if (ts.reserved_widget == nullptr) {
                 for (auto it = widgets.rbegin(); it != widgets.rend(); ++it) {
                     if ((*it)->is_in_touch_area(scaled_x, scaled_y)) {
-                        if ((*it)->handle_touch(scaled_x, scaled_y, true)) {
+                        if ((*it)->handle_touch(scaled_x, scaled_y, true, ts.tracking_id)) {
                             ts.reserved_widget = it->get();
                             break;
                         }
@@ -161,16 +163,17 @@ void TouchManager::process_complete_touch_frame(std::vector<std::unique_ptr<Widg
                     Button* btn = dynamic_cast<Button*>(ts.reserved_widget);
                     
                     if (btn) {
-                        // Button: Release & freigeben
-                        ts.reserved_widget->handle_touch(ts.last_valid_x, ts.last_valid_y, false);
+                        // Button: Send touch-up, but button decides if it really releases
+                        // (it stays pressed if other fingers are still touching)
+                        ts.reserved_widget->handle_touch(ts.last_valid_x, ts.last_valid_y, false, ts.tracking_id);
                         ts.reserved_widget = nullptr;
                     } else {
                         // Fader: Weiter senden (clippt intern)
-                        ts.reserved_widget->handle_touch(scaled_x, scaled_y, true);
+                        ts.reserved_widget->handle_touch(scaled_x, scaled_y, true, ts.tracking_id);
                     }
                 } else {
                     // Innerhalb - normal senden
-                    ts.reserved_widget->handle_touch(scaled_x, scaled_y, true);
+                    ts.reserved_widget->handle_touch(scaled_x, scaled_y, true, ts.tracking_id);
                 }
             }
             

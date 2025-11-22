@@ -4,6 +4,7 @@ class Widget;
 
 struct TouchSlot {
     int tracking_id;
+    int last_tracking_id;  // Store ID before release
     int x, y;
     bool active;
     bool down_sent;
@@ -15,7 +16,7 @@ struct TouchSlot {
     int last_valid_y;
     
     TouchSlot() 
-        : tracking_id(-1), x(0), y(0), active(false), 
+        : tracking_id(-1), last_tracking_id(-1), x(0), y(0), active(false), 
           down_sent(false), has_position(false),
           pending_touch(false), pending_release(false),
           reserved_widget(nullptr),

@@ -2,8 +2,17 @@
 
 #include "Widget.h"
 #include "../core/Types.h"
+#include <vector>
+#include <map>
 
 class Renderer;
+
+struct TouchFingerState {
+    int touch_id;
+    int start_x;
+    int last_x;  // Track last known position
+    float value_at_start;
+};
 
 class Fader : public Widget {
 private:
@@ -11,12 +20,13 @@ private:
     float target_progress;
     SliderMode mode;
     float smooth_speed;
-    int touch_start_x;
-    float value_at_touch_start;
-    bool is_touched;
     Color bg_color;
     Color fill_color;
     float dither_alpha;
+    
+    // Multitouch: Stack of active fingers (last = top)
+    std::vector<int> finger_stack;
+    std::map<int, TouchFingerState> finger_states;
     
 public:
     Fader(float x, float y, float w, float h);
@@ -31,5 +41,10 @@ public:
     
     void update(float dt) override;
     void draw(Renderer& renderer) override;
-    bool handle_touch(int tx, int ty, bool down) override;
+    bool handle_touch(int tx, int ty, bool down, int touch_id) override;
+    
+private:
+    int get_active_finger() const { 
+        return finger_stack.empty() ? -1 : finger_stack.back(); 
+    }
 };
