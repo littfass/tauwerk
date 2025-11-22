@@ -57,11 +57,6 @@ bool Button::handle_touch(int tx, int ty, bool down, int touch_id) {
     auto it = std::find(active_touches.begin(), active_touches.end(), touch_id);
     bool is_tracked = (it != active_touches.end());
     
-    // DEBUG: Print touch info
-    std::cout << "BTN[" << text << "] touch: (" << tx << "," << ty << ") down=" << down 
-              << " id=" << touch_id << " tracked=" << is_tracked 
-              << " stack_before=" << active_touches.size();
-    
     // Remember state BEFORE modification
     bool was_pressed = !active_touches.empty();
     
@@ -89,7 +84,6 @@ bool Button::handle_touch(int tx, int ty, bool down, int touch_id) {
     
     if (was_pressed != is_now_pressed) {
         dirty = true;
-        std::cout << " -> STATE_CHANGE: " << (is_now_pressed ? "PRESSED" : "RELEASED") << std::endl;
         
         if (is_now_pressed) {
             // Transition: RELEASED → PRESSED (onPress)
@@ -109,8 +103,6 @@ bool Button::handle_touch(int tx, int ty, bool down, int touch_id) {
                 on_click();
             }
         }
-    } else {
-        std::cout << " -> no state change" << std::endl;
     }
     
     return true;

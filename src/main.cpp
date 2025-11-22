@@ -12,7 +12,7 @@
 #include "input/TouchManager.h"
 
 int main() {
-    std::cout << "🎨 GPU-Accelerated UI - Extended Touch Areas!" << std::endl;
+    std::cout << "🎨 Tauwerk UI starting..." << std::endl;
     
     // System setup
     BacklightController backlight;
@@ -25,10 +25,11 @@ int main() {
         return 1;
     }
     
-    // Touch - ← NEU! Mit Screen-Dimensionen
+    // Touch
     TouchManager touch(renderer.get_scale(), renderer.get_width(), renderer.get_height());
     if (!touch.initialize()) {
-        std::cerr << "⚠️  Touch init failed" << std::endl;
+        std::cerr << "❌ Touch init failed!" << std::endl;
+        return 1;
     }
     
     // UI Layout
@@ -50,17 +51,13 @@ int main() {
     // Test Button
     auto* test_button = ui.add_widget<Button>(100, 340, 200, 60, "Test Button");
     test_button->set_on_click([]() {
-        std::cout << "🔘 Button clicked!" << std::endl;
+        // Button clicked
     });
 
     auto* latch_button = ui.add_widget<Button>(350, 340, 200, 60, "LATCH", ButtonMode::LATCH);
     latch_button->set_on_click([]() {
-        std::cout << "🔘 Latch toggled!" << std::endl;
+        // Latch toggled
     });
-    
-    std::cout << "\n🎮 Extended Touch Areas aktiv!" << std::endl;
-    std::cout << "🎯 Touch überall → Widgets reagieren in ihrer Area!" << std::endl;
-    std::cout << "🖐️  Drag über Screen-Rand → Fader bewegt sich weiter!" << std::endl;
     
     // Main Loop
     auto last_interaction_time = std::chrono::steady_clock::now();
@@ -134,6 +131,6 @@ int main() {
         }
     }
     
-    std::cout << "\n✅ Complete!" << std::endl;
+    std::cout << "✅ Shutdown complete" << std::endl;
     return 0;
 }

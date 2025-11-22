@@ -24,6 +24,11 @@ logs/
 .vscode-server/
 .idea/
 .wget-hsts
+.cache/
+.ssh/
+.bashrc
+.gitconfig
+.sudo_as_admin_successful
 
 # Backups (keep structure, not content)
 backups/config/*/

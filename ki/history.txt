@@ -98,6 +98,26 @@
 - [DONE] Makefile TAB-Problem gelöst
 - [DECISION] test.cpp wird zu tauwerk_touchpad.cpp (OOP-Architektur ist die neue Basis)
 - [BUG] Keine bekannten Bugs nach Refactoring
+
+2025-11-22 00:15
+- [DONE] Multitouch Finger-Stack Implementation für alle Widgets
+- [DONE] Fader: Letzter Finger steuert, vorheriger übernimmt bei Touch-Up (Arpeggio-Verhalten)
+- [DONE] Button: Multi-Finger Press Protection - Button bleibt pressed bis alle Finger weg
+- [DONE] Touch-ID Propagation durch gesamtes Touch-System (Kernel tracking_id → Widgets)
+- [DONE] TouchFingerState Tracking: touch_id, start_x, last_x, value_at_start
+- [DONE] Finger-Stack (LIFO) in Fader und Button implementiert
+- [DONE] State-based Button Logic: Stack empty↔full = onPress/onRelease (keine spurious triggers)
+- [DONE] Widget::handle_touch() erweitert mit touch_id Parameter
+- [DONE] TouchManager: last_tracking_id für Release-Events, Multi-Slot auf gleichen Widgets
+- [DONE] Touch-Area Bounds-Fix: Inklusive <= statt exklusive <
+- [DONE] Touch Buffer von 5px auf 10px erhöht für bessere Finger-Erkennung auf 45° geneigtem Touchscreen
+- [DONE] SVG Logo zentriert (viewBox="17 26 335 317")
+- [DONE] README.md Update: Zentriertes Logo und Titel "Building custom music gear."
+- [DONE] Git Push: Commit ab15ad3 mit kompletter Multitouch Implementation
+- [DECISION] 10px Touch-Buffer optimal für Finger-Rundung auf geneigtem Display
+- [DECISION] Smooth Handoff zwischen Fingern durch last_x Position Tracking
+- [ARCHITECTURE] Finger-Stack System: std::vector<int> + std::map<int, TouchFingerState>
+- [BUG] Keine bekannten Bugs - Multitouch funktioniert stabil an allen Widget-Rändern
 - [NEXT] Erweiterte Touch-Areas für Widgets implementieren (Touch-Reservation, Drag-Support)
 - [NEXT] Button Widget verbessern (Velocity/Pressure Support prüfen, Scale-Animation)
 - [NEXT] Weitere UI Widgets planen (Knob, VU Meter, Multi-Page Layout System)
