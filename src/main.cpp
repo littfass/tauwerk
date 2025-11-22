@@ -36,36 +36,53 @@ int main() {
     Layout ui;
     
     // 🎨 Create UI
-    auto* title = ui.add_widget<Label>(50, 100, "Extended Touch Areas!", Color(1, 1, 1, 1));
+    const float WIDGET_HEIGHT = 60;
     
-    auto* fader = ui.add_widget<Fader>(100, 240, 600, 80);
+    // Title Icon (\E803 in UTF-8) - Tauwerk Logo
+    auto* title = ui.add_widget<Label>(50, 30, "\xEE\xA0\x83", 
+        Color(1, 1, 1, 1), FontType::ICONS, 80);
+    
+    // Fader mit Label und integriertem Value-Display
+    auto* fader = ui.add_widget<Fader>(50, 150, 700, WIDGET_HEIGHT);
+    fader->set_name("Master Volume");
     fader->set_mode(SliderMode::SMOOTH);
     fader->set_smooth_speed(0.15f);
+    fader->set_value(0.75f);
     
-    auto* value_label = ui.add_widget<Label>(370, 190, "50%", Color(1, 1, 1, 1));
-    
-    auto* perf_label = ui.add_widget<Label>(650, 50, "16.6 ms", Color(0.7f, 0.7f, 0.7f, 1));
-    
-    auto* mode_label = ui.add_widget<Label>(50, 430, "Touch anywhere!", Color(1, 1, 1, 1));
-    
-    // Test Button
-    auto* test_button = ui.add_widget<Button>(100, 340, 200, 60, "Test Button");
-    test_button->set_on_click([]() {
-        // Button clicked
+    // Buttons mit einheitlicher Höhe
+    auto* play_button = ui.add_widget<Button>(50, 250, 150, WIDGET_HEIGHT, "PLAY");
+    play_button->set_name("Transport");
+    play_button->set_on_click([]() {
+        // Play/Stop
     });
 
-    auto* latch_button = ui.add_widget<Button>(350, 340, 200, 60, "LATCH", ButtonMode::LATCH);
-    latch_button->set_on_click([]() {
-        // Latch toggled
+    auto* record_button = ui.add_widget<Button>(220, 250, 150, WIDGET_HEIGHT, "REC", ButtonMode::LATCH);
+    record_button->set_name("Record");
+    record_button->set_on_click([]() {
+        // Record toggle
     });
+    
+    auto* sync_button = ui.add_widget<Button>(390, 250, 150, WIDGET_HEIGHT, "SYNC");
+    sync_button->set_name("MIDI Sync");
+    
+    // Weitere Fader
+    auto* tempo_fader = ui.add_widget<Fader>(50, 360, 340, WIDGET_HEIGHT);
+    tempo_fader->set_name("Tempo");
+    tempo_fader->set_value(0.5f);
+    
+    auto* swing_fader = ui.add_widget<Fader>(410, 360, 340, WIDGET_HEIGHT);
+    swing_fader->set_name("Swing");
+    swing_fader->set_value(0.5f);
+    
+    // Performance-Info
+    auto* perf_label = ui.add_widget<Label>(650, 10, "16.6 ms", 
+        Color(0.7f, 0.7f, 0.7f, 1), FontType::DEFAULT, 16);
     
     // Main Loop
     auto last_interaction_time = std::chrono::steady_clock::now();
     float avg_frame_time = 16.0f;
     bool high_fps_mode = false;
     const float IDLE_TIMEOUT = 1.0f;
-    
-    int last_percentage = -1;
     
     while (true) {
         auto frame_start = std::chrono::steady_clock::now();
@@ -89,13 +106,6 @@ int main() {
         auto idle_time = std::chrono::duration<float>(
             frame_start - last_interaction_time).count();
         high_fps_mode = (idle_time < IDLE_TIMEOUT) || had_touch || is_animating;
-        
-        // Update UI Values
-        int percentage = (int)(fader->get_value() * 100);
-        if (percentage != last_percentage) {
-            value_label->set_text(std::to_string(percentage) + "%");
-            last_percentage = percentage;
-        }
         
         // Render
         renderer.begin_frame();

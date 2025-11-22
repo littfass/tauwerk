@@ -46,9 +46,9 @@ private:
     
     // Font
     FT_Library ft_library;
-    FT_Face ft_face;
-    std::map<char, Glyph> glyphs;
-    int font_size;
+    std::map<FontCacheKey, std::map<char, Glyph>> font_cache;
+    std::map<FontCacheKey, FontMetrics> font_metrics;
+    bool ft_initialized;
     
     // Shader sources
     const char* vertex_shader;
@@ -63,7 +63,10 @@ private:
     GLuint compile_shader(GLenum type, const char* source);
     GLuint create_program(const char* vs, const char* fs);
     int detect_display_rotation();
-    bool setup_font(const char* font_path, int size);
+    bool load_font(FontType type, int size);
+    const char* get_font_path(FontType type);
+    std::map<char, Glyph>* get_font_glyphs(FontType type, int size);
+    FontMetrics* get_font_metrics(FontType type, int size);
 
 public:
     Renderer();
@@ -77,8 +80,13 @@ public:
     
     // Drawing primitives
     void draw_rect(float x, float y, float w, float h, const Color& color);
+    void draw_rect_inverted(float x, float y, float w, float h);
     void draw_dithered(float x, float y, float w, float h, const Color& color, float dot_alpha = 0.133f);
-    void draw_text(const std::string& text, float x, float y, const Color& color);
+    void draw_text(const std::string& text, float x, float y, const Color& color, 
+                   FontType font = FontType::DEFAULT, int size = 24);
+    void draw_text_inverted(const std::string& text, float x, float y,
+                            FontType font = FontType::DEFAULT, int size = 24);
+    float get_text_width(const std::string& text, FontType font = FontType::DEFAULT, int size = 24);
     
     // Getters
     uint32_t get_width() const { return render_width; }

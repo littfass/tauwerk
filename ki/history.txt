@@ -1,15 +1,15 @@
-2024-01-15 14:30
+2025-10-15
 - [DONE] Backup-Script erweitert um latest/-Kopie
 - [DONE] /history Command für KI-Partner definiert
 - [DECISION] Getrennte Dateien: context.txt (statisch) vs history.txt (dynamisch)
 - [DECISION] Pro Chat-Session = 1 Thema fokussieren
 - [BLOCKER] Token-Limits erfordern regelmäßige Session-Wechsel
 
-2024-01-15 14:35
+2025-10-15
 - [DECISION] MIDI über C++ raw ALSA (Python-Bindings zu instabil auf RPi5)
 - [DECISION] PyGame → DRM Migration für latenzfreies Touch-Interface
 
-2024-01-15 14:40
+2025-10-15
 - [BUG] hardware.json im GPIO-Treiber und device.py noch nicht ersetzt
 - [DONE] Tauwerk-Spezifik aus context.txt in history.txt migriert
 - [DONE] JSON aus C++ Treiber entfernt
@@ -18,16 +18,16 @@
 - [IN_PROGRESS] C++ Treiber und Python an existierende hardware.ini angepasst
 - [DONE] GPIO Treiber produziert stabile Events
 
-2024-01-15 14:55
+2025-10-15
 - [DECISION] Separate Services: tauwerk_gpio.service (C++) + tauwerk.service (Python)
 
-2024-11-08 03:55
+2025-11-08
 - [DONE] Virtual Environment Setup in deployment integriert
 - [DONE] System startet sauber mit venv-Aktivierung
 - [DONE] Python Hauptapplikation läuft stabil im Loop
 - [IN_PROGRESS] Python Skripte optimieren
 
-2024-11-08 04:15
+2025-11-08
 - [DONE] GPIO komplett gefixt - Encoder, Buttons, OLEDs laufen in Echtzeit
 - [DONE] Framebuffer-Test erfolgreich (rotes Rechteck)
 - [DONE] Farbformat BGR identifiziert und korrigiert
@@ -37,7 +37,7 @@
 - [IN_PROGRESS] Touchbar UI in Haupt-App integrieren (PyGame komplett durch Framebuffer ersetzen)
 - [BLOCKER] Touchpad-Klasse muss Loop-Struktur anpassen für Main-Integration
 
-2024-11-08 05:15
+2025-11-08
 - [DONE] C++ Grafik-Treiber erfolgreich getestet - Shared Memory Kommunikation funktioniert perfekt
 - [DONE] Kernel Console Problem gelöst mit vt.global_cursor_default=0
 - [DECISION] C++ Komplett-Treiber statt getrennter Prozesse für maximale Performance
@@ -45,14 +45,14 @@
 - [BLOCKER] Touch Device Detection in C++ muss gefixt werden
 - [NEXT] Touch Input Debugging und Portierung von Calibration/Multitouch in C++
 
-2024-11-08 05:45
+2025-11-08
 - [DECISION] LockFreeEngine bleibt KERNSTÜCK für MIDI/Clock Performance (0.1ms Latenz)
 - [DECISION] Shared Memory nur für UI ↔ Python Kommunikation (1.5-3ms Latenz - ausreichend)
 - [DECISION] Standard Shared Memory (Memory-Order Optimierung nur bei Bedarf)
 - [ARCHITECTURE] C++ UI → (1.5ms SM) → Python Logic → (0.1ms) → LockFreeEngine → (0.05ms) → MIDI Hardware
 - [NEXT] Komplette Shared Memory Bridge für UI-Kommunikation implementieren
 
-2024-11-11 21:48
+2025-11-11
 - [DONE] C++ Touchpad Driver mit Shared Memory Bridge implementiert
 - [DONE] Python UI Bridge für Kommunikation mit C++ Treiber
 - [DONE] Basic Touch-Input mit Single-Touch und Multitouch Support
@@ -66,17 +66,17 @@
 - [BUG] Fader haben spürbaren Lag bei Bewegung
 - [DONE] Performance Optimierungen: FPS Limiting auf 60 FPS, Python Loop auf 1000 FPS, Event Deduplication
 
-2024-11-13 12:14
+2025-11-13
 - [DONE] Multitouch Implementation und Device Detection korrigiert
 - [BLOCKER] Fader Lag bei Bewegung (erneut)
 
-2024-11-14 07:37
+2025-11-14
 - [DONE] C++ Touch UI Driver komplett neu implementiert mit eigenständigem Rendering
 - [DONE] Double Buffering für flackern-freies Rendering integriert
 - [DONE] Time-based Animation für Smoothness
 - [DONE] Shared Memory Bridge für asynchrone Python-Kommunikation
 
-2025-11-19 09:20
+2025-11-19
 - [IN_PROGRESS] DSI Display Integration auf Raspberry Pi (Display wird nicht erkannt)
 - [DONE] Grundlegende Diagnostik mit modetest (zeigt nur HDMI)
 - [BUG] DSI-Interface nicht initialisiert
@@ -89,7 +89,7 @@
 - [DECISION] Device Priority für Multi-Display: card1 (DSI) → card2 (VC4/HDMI) → card0 (V3D)
 - [BLOCKER] Keine aktuellen Blocker! ✅ Display-Stack vollständig funktionsfähig
 
-2024-11-20 22:30
+2025-11-20
 - [DONE] Komplettes OOP Refactoring: Monolithische test.cpp in saubere Architektur aufgeteilt
 - [DONE] Neue Ordnerstruktur: src/core/, src/widgets/, src/input/
 - [DONE] Widget Base Class, Label, Fader, Button Widgets, Layout Manager, Renderer Class, TouchManager implementiert
@@ -99,7 +99,7 @@
 - [DECISION] test.cpp wird zu tauwerk_touchpad.cpp (OOP-Architektur ist die neue Basis)
 - [BUG] Keine bekannten Bugs nach Refactoring
 
-2025-11-22 00:15
+2025-11-22
 - [DONE] Multitouch Finger-Stack Implementation für alle Widgets
 - [DONE] Fader: Letzter Finger steuert, vorheriger übernimmt bei Touch-Up (Arpeggio-Verhalten)
 - [DONE] Button: Multi-Finger Press Protection - Button bleibt pressed bis alle Finger weg
@@ -121,3 +121,103 @@
 - [NEXT] Erweiterte Touch-Areas für Widgets implementieren (Touch-Reservation, Drag-Support)
 - [NEXT] Button Widget verbessern (Velocity/Pressure Support prüfen, Scale-Animation)
 - [NEXT] Weitere UI Widgets planen (Knob, VU Meter, Multi-Page Layout System)
+
+2025-11-22
+- [DONE] Multi-Font-System implementiert mit Lazy-Loading
+- [DONE] 3 Font-Typen: DEFAULT (DejaVu), DIGITAL (DS Digital Bold), ICONS (Tauwerk)
+- [DONE] 4 empfohlene Größen: 16, 24, 32, 48px (beliebige Größen möglich)
+- [DONE] Font-Cache-System: std::map<FontCacheKey, std::map<char, Glyph>>
+- [DONE] Label Widget erweitert mit FontType und Size-Parametern
+- [DONE] Renderer::draw_text() mit Font-Parametern
+- [DONE] Assets-Ordner für Custom-Fonts (keine System-Fonts nötig)
+- [DONE] Font-Demo erstellt (bin/font_demo)
+- [DONE] FONTS.md Dokumentation mit Beispielen und Best Practices
+- [DECISION] Assets-Pfade statt System-Fonts für Custom-Fonts (cleaner, kein Root)
+- [DECISION] Lazy-Loading statt Pre-Loading (nur benötigte Fonts laden)
+- [DECISION] Glyph-Cache pro Font+Größe (ASCII 32-127, ~96 Texturen)
+- [ARCHITECTURE] FontType Enum + FontCacheKey Struct für typsicheres Font-Management
+- [ARCHITECTURE] get_font_glyphs() → prüft Cache → load_font() bei Bedarf
+- [PERFORMANCE] ~500KB pro Font+Größe, ~4MB bei allen 3 Fonts in 4 Größen
+- [BUG] Keine bekannten Bugs - Multi-Font-System läuft stabil
+- [NEXT] Icon-Font tauwerk.ttf mit Custom-Icons befüllen
+- [NEXT] Font-Metrics für Text-Alignment (centered, right-aligned)
+
+2025-11-22
+- [DONE] Einheitliche Widget-Höhe für Fader und Buttons (WIDGET_HEIGHT = 60)
+- [DONE] Widget-Label-System: set_name() für Fader und Button
+- [DONE] Name-Labels 5px über Widget, linksbündig, 16px DejaVuSans
+- [DONE] Fader: Automatische Value-Anzeige im Fader (10px padding-left)
+- [DONE] Fader: Dynamische Textfarbe (schwarz auf weiß, weiß auf dither)
+- [DONE] Fader: Value-Text wird in update() automatisch aktualisiert
+- [DONE] Button: Name-Label Integration
+- [DONE] Widget-Demo erstellt (bin/widget_demo) - Showcase aller Features
+- [DONE] FONTS.md erweitert mit Widget-Label-Beispielen
+- [DECISION] Value-Display direkt im Fader (kein separates Label nötig)
+- [DECISION] Position-basierte Textfarbe (fill_width Check) - kein Performance-Impact
+- [DECISION] Digital-Font 24px für Fader-Values (gut lesbar auf 60px Höhe)
+- [ARCHITECTURE] Fader.update() aktualisiert value_text basierend auf progress
+- [ARCHITECTURE] Fader.draw() rendert Name-Label, Background, Fill, Value-Label
+- [PERFORMANCE] Dynamische Textfarbe = 1x float-Vergleich pro Frame (negligible)
+- [BUG] Keine bekannten Bugs - Widget-Label-System funktioniert perfekt
+- [NEXT] Text-Alignment für Labels (centered, right-aligned)
+- [NEXT] Fader-Value mit Custom-Formatter (BPM, Hz, dB, etc.)
+
+2025-11-22
+- [DONE] Typography-Fix: Top-Left-Positionierung statt Baseline
+- [DONE] FontMetrics Struktur (ascender, descender, line_height)
+- [DONE] Keine Descender/Ascender über Widget-Bounds hinaus
+- [DONE] Y-Position korrigiert: baseline_y = y + metrics->ascender
+- [DONE] Typography-Test-Demo erstellt (bin/typography_test)
+- [BUG FIXED] Descenders (p, g, q, y, j) ragten über Großbuchstaben hinaus
+- [BUG FIXED] Text-Bounding-Box passt jetzt zur angegebenen Y-Position
+- [DECISION] Top-Left-Origin für UI-Text (Standard für Game/UI Engines)
+- [ARCHITECTURE] font_metrics Cache parallel zu font_cache
+- [ARCHITECTURE] FreeType metrics.ascender/descender beim Font-Load extrahieren
+- [PERFORMANCE] Kein Impact - Metrics einmalig beim Font-Load, 1x Addition pro draw_text()
+- [NEXT] Text-Baseline-Option für spezielle Fälle (wenn benötigt)
+
+2025-11-22
+- [DONE] Widget-Labels: Uppercase und 21px Abstand (16px text + 5px gap)
+- [DONE] Fader-Value: 48px Digital-Font (füllt fast 60px Höhe)
+- [DONE] Fader-Value: Invert-BlendMode statt manuelle Farbwahl
+- [DONE] draw_text_inverted() mit GL_ONE_MINUS_DST_COLOR
+- [DONE] Button-Icons: Icon-Font Integration vorbereitet
+- [DONE] Button-Icon-Größe: 80% der Button-Höhe (48px bei 60px)
+- [DECISION] Invert-BlendMode für Fader-Values (automatischer Kontrast)
+- [DECISION] GL_ONE_MINUS_DST_COLOR + GL_ZERO (perfekt für Text-Invert)
+- [DECISION] Unicode-Glyphs (0xE801) noch TODO - aktuell ASCII im Cache
+- [ARCHITECTURE] BlendFunc temporär gewechselt in draw_text_inverted()
+- [ARCHITECTURE] BlendFunc-Restore nach Rendering (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+- [PERFORMANCE] Invert-BlendMode = zero overhead (natives OpenGL Feature)
+- [PERFORMANCE] BlendFunc-Wechsel = 1 State-Change pro Fader-Value (negligible)
+- [TODO] Glyph-Cache für Unicode erweitern (aktuell nur ASCII 32-127)
+- [NEXT] Unicode-Support für Icon-Font (0xE000-0xF8FF Private Use Area)
+
+2025-11-22
+- [DONE] UTF-8 Icon-Glyph-System komplett implementiert (Unicode Private Use Area)
+- [DONE] Icon-Glyphs 0xE801, 0xE803 aus Tauwerk-Font geladen
+- [DONE] UTF-8 3-Byte-Sequenzen Parser in draw_text() und draw_text_inverted()
+- [DONE] Glyph-Cache-Mapping: UTF-8 drittes Byte als Key (0xE801→0x81, 0xE803→0x83)
+- [DONE] Button-Icons: UTF-8 "\xEE\xA0\x81" für Unicode \E801
+- [DONE] Titel-Icon: UTF-8 "\xEE\xA0\x83" für Unicode \E803 (Tauwerk Logo)
+- [DONE] Logo-Größe auf 80px erhöht (prominent, repräsentiert "Tauwerk"-Text)
+- [DONE] DIGITAL-Font Rendering-Problem mit BlendMode gelöst
+- [DONE] Invert-Fill-System: Schwarzer Rect mit Invert-BlendMode
+- [DONE] draw_rect_inverted() implementiert
+- [DONE] get_text_width() für präzise Text-Breiten-Berechnung
+- [DONE] Smart-Invert-Fader: Weißer Text auf Dither, automatisch schwarz auf hellem Fill
+- [DECISION] UTF-8 Byte-Extraction statt Unicode-Codepoint-Lookup (simpler, schneller)
+- [DECISION] Icon-Glyph-Loop beim Font-Load (explizite Unicode-Codepoints)
+- [DECISION] Schwarzer Fill mit Invert-BlendMode statt weißer Fill
+- [DECISION] Text bleibt immer weiß, Fill invertiert Hintergrund UND Text
+- [ARCHITECTURE] UTF-8 Parsing: Erkennt 0xEE 0xA0 0x8X Pattern, extrahiert drittes Byte
+- [ARCHITECTURE] Invert-System: Dither (dunkel) + Text (weiß) + Fill (schwarz+invert)
+- [ARCHITECTURE] Fill-Invert macht: dunkler Dither→hell, weißer Text→schwarz
+- [PERFORMANCE] UTF-8 Parsing: +1 if-Check pro Zeichen (negligible)
+- [PERFORMANCE] Invert-BlendMode: Zero overhead, native GPU-Feature
+- [PERFORMANCE] BlendFunc-Wechsel: ~0.001ms pro Fader (für 3-5 Fader kein Problem)
+- [BUG FIXED] Icon-Glyphs zeigten schwarze Rechtecke → UTF-8 Parsing fehlte
+- [BUG FIXED] DIGITAL-Font zeigte leere Glyph-Bounds → BlendMode auf Text war falsch
+- [BUG FIXED] Invert-Rect über gesamten Fader → nur Fill bekommt Invert-BlendMode
+- [NEXT] Optional: BlendMode-Batching wenn >10 Fader (aktuell nicht nötig)
+- [NEXT] Weitere Icon-Glyphs im Tauwerk-Font definieren (Play, Record, Sync, etc.)

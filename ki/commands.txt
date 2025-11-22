@@ -27,7 +27,7 @@ CUSTOM COMMANDS FÜR KI-PARTNER:
   - Beschreibung:
     Erstellt oder aktualisiert die history.txt mit allen aktuellen Tasks, Entscheidungen und Blockern aus diesem Chat.
   - Format:
-    YYYY-MM-DD HH:MM
+    YYYY-MM-DD
     - [DONE] Was erledigt wurde
     - [BUG] Aktuelle Bugs
     - [NEXT] Nächste Tasks  

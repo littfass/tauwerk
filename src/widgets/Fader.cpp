@@ -6,7 +6,8 @@
 Fader::Fader(float x, float y, float w, float h)
     : Widget(x, y, w, h), progress(0.5f), target_progress(0.5f),
       mode(SliderMode::JUMP), smooth_speed(0.15f),
-      bg_color(1, 1, 1, 1), fill_color(1, 1, 1, 1), dither_alpha(0.133f) {}
+      bg_color(1, 1, 1, 1), fill_color(1, 1, 1, 1), dither_alpha(0.133f),
+      name(""), value_text(""), show_value(true) {}
 
 void Fader::set_mode(SliderMode m) { 
     mode = m; 
@@ -14,6 +15,16 @@ void Fader::set_mode(SliderMode m) {
 
 void Fader::set_smooth_speed(float speed) { 
     smooth_speed = speed; 
+}
+
+void Fader::set_name(const std::string& n) {
+    name = n;
+    dirty = true;
+}
+
+void Fader::set_show_value(bool show) {
+    show_value = show;
+    dirty = true;
 }
 
 void Fader::set_value(float v) { 
@@ -40,18 +51,41 @@ void Fader::update(float dt) {
             }
         }
     }
+    
+    // Update value text
+    if (show_value) {
+        int percentage = (int)(progress * 100);
+        value_text = std::to_string(percentage) + "%";
+    }
 }
 
 void Fader::draw(Renderer& renderer) {
     if (!visible) return;
     
+    // Name Label (uppercase, 21px über Fader = 16px text height + 5px gap)
+    if (!name.empty()) {
+        std::string upper_name = name;
+        for (char& c : upper_name) c = std::toupper(c);
+        renderer.draw_text(upper_name, x, y - 21, Color(1, 1, 1, 1), FontType::DEFAULT, 16);
+    }
+    
     // Background (dithered)
     renderer.draw_dithered(x, y, width, height, bg_color, dither_alpha);
     
-    // Fill
+    // Value Label im Fader - immer weiß
+    if (show_value && !value_text.empty()) {
+        float text_x = x + 10;
+        float text_y = y + (height - 52) / 2;
+        
+        renderer.draw_text(value_text, text_x, text_y, Color(1, 1, 1, 1), FontType::DIGITAL, 52);
+    }
+    
+    // Fill: Schwarzes Rect mit Invert-BlendMode
+    // → Invertiert dunklen Dither zu hellem Fill
+    // → Invertiert weißen Text zu schwarzem Text
     float fill_width = width * progress;
     if (fill_width > 0) {
-        renderer.draw_rect(x, y, fill_width, height, fill_color);
+        renderer.draw_rect_inverted(x, y, fill_width, height);
     }
 }
 

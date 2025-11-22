@@ -17,7 +17,7 @@ Renderer::Renderer()
       width(0), height(0), render_width(0), render_height(0),
       render_scale(1.0f), display_rotation(0),
       shader_program_dither(0), shader_program_solid(0), shader_program_text(0),
-      vbo(0), text_vbo(0), ft_library(nullptr), ft_face(nullptr), font_size(32)
+      vbo(0), text_vbo(0), ft_library(nullptr), ft_initialized(false)
 {
     // Shader sources
     vertex_shader = R"(
@@ -180,24 +180,84 @@ int Renderer::detect_display_rotation() {
     return 0;
 }
 
-bool Renderer::setup_font(const char* font_path, int size) {
-    font_size = size;
+const char* Renderer::get_font_path(FontType type) {
+    switch (type) {
+        case FontType::DEFAULT:
+            return "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
+        case FontType::DIGITAL:
+            return "/home/tauwerk/assets/fonts/ds_digital/ds_digi_bold.ttf";
+        case FontType::ICONS:
+            return "/home/tauwerk/assets/fonts/tauwerk/tauwerk.ttf";
+        default:
+            return "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
+    }
+}
+
+std::map<char, Glyph>* Renderer::get_font_glyphs(FontType type, int size) {
+    FontCacheKey key = {type, size};
     
-    if (FT_Init_FreeType(&ft_library)) {
-        std::cerr << "❌ FreeType init failed" << std::endl;
-        return false;
+    if (font_cache.find(key) != font_cache.end()) {
+        return &font_cache[key];
     }
     
-    if (FT_New_Face(ft_library, font_path, 0, &ft_face)) {
+    if (load_font(type, size)) {
+        return &font_cache[key];
+    }
+    
+    return nullptr;
+}
+
+FontMetrics* Renderer::get_font_metrics(FontType type, int size) {
+    FontCacheKey key = {type, size};
+    
+    if (font_metrics.find(key) != font_metrics.end()) {
+        return &font_metrics[key];
+    }
+    
+    if (load_font(type, size)) {
+        return &font_metrics[key];
+    }
+    
+    return nullptr;
+}
+
+bool Renderer::load_font(FontType type, int size) {
+    if (!ft_initialized) {
+        if (FT_Init_FreeType(&ft_library)) {
+            std::cerr << "❌ FreeType init failed" << std::endl;
+            return false;
+        }
+        ft_initialized = true;
+    }
+    
+    FontCacheKey key = {type, size};
+    if (font_cache.find(key) != font_cache.end()) {
+        return true;
+    }
+    
+    const char* font_path = get_font_path(type);
+    
+    FT_Face face;
+    if (FT_New_Face(ft_library, font_path, 0, &face)) {
         std::cerr << "❌ Failed to load font: " << font_path << std::endl;
         return false;
     }
     
-    FT_Set_Pixel_Sizes(ft_face, 0, size);
+    FT_Set_Pixel_Sizes(face, 0, size);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     
+    // Extract font metrics
+    FontMetrics metrics;
+    metrics.ascender = face->size->metrics.ascender >> 6;
+    metrics.descender = face->size->metrics.descender >> 6;
+    metrics.line_height = face->size->metrics.height >> 6;
+    font_metrics[key] = metrics;
+    
+    std::map<char, Glyph> glyphs;
+    
+    // Load ASCII glyphs (32-127)
     for (unsigned char c = 32; c < 128; c++) {
-        if (FT_Load_Char(ft_face, c, FT_LOAD_RENDER)) {
+        if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
             continue;
         }
         
@@ -205,8 +265,8 @@ bool Renderer::setup_font(const char* font_path, int size) {
         glGenTextures(1, &texture);
         glBindTexture(GL_TEXTURE_2D, texture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE,
-            ft_face->glyph->bitmap.width, ft_face->glyph->bitmap.rows,
-            0, GL_LUMINANCE, GL_UNSIGNED_BYTE, ft_face->glyph->bitmap.buffer);
+            face->glyph->bitmap.width, face->glyph->bitmap.rows,
+            0, GL_LUMINANCE, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
         
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -215,17 +275,63 @@ bool Renderer::setup_font(const char* font_path, int size) {
         
         Glyph glyph = {
             texture,
-            (int)ft_face->glyph->bitmap.width,
-            (int)ft_face->glyph->bitmap.rows,
-            ft_face->glyph->bitmap_left,
-            ft_face->glyph->bitmap_top,
-            (int)(ft_face->glyph->advance.x >> 6)
+            (int)face->glyph->bitmap.width,
+            (int)face->glyph->bitmap.rows,
+            face->glyph->bitmap_left,
+            face->glyph->bitmap_top,
+            (int)(face->glyph->advance.x >> 6)
         };
         
         glyphs[c] = glyph;
     }
     
-    std::cout << "✅ Font loaded: " << font_path << " (" << size << "px)" << std::endl;
+    // Load Icon glyphs for ICONS font (Private Use Area 0xE000-0xF8FF)
+    if (type == FontType::ICONS) {
+        // Icon glyphs: 0xE801, 0xE803
+        unsigned int icon_codepoints[] = {0xE801, 0xE803};
+        
+        for (unsigned int codepoint : icon_codepoints) {
+            if (FT_Load_Char(face, codepoint, FT_LOAD_RENDER)) {
+                std::cerr << "⚠️  Icon glyph 0x" << std::hex << codepoint << " not found" << std::dec << std::endl;
+                continue;
+            }
+            
+            GLuint texture;
+            glGenTextures(1, &texture);
+            glBindTexture(GL_TEXTURE_2D, texture);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE,
+                face->glyph->bitmap.width, face->glyph->bitmap.rows,
+                0, GL_LUMINANCE, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
+            
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            
+            Glyph glyph = {
+                texture,
+                (int)face->glyph->bitmap.width,
+                (int)face->glyph->bitmap.rows,
+                face->glyph->bitmap_left,
+                face->glyph->bitmap_top,
+                (int)(face->glyph->advance.x >> 6)
+            };
+            
+            // Map Unicode codepoint to UTF-8 last byte
+            // 0xE801 → UTF-8: 0xEE 0xA0 0x81 → use 0x81 as key
+            // 0xE803 → UTF-8: 0xEE 0xA0 0x83 → use 0x83 as key
+            // This works because we check the 3rd byte in draw_text()
+            char key_char = (char)(0x80 | (codepoint & 0x7F));
+            glyphs[key_char] = glyph;
+        }
+    }
+    
+    font_cache[key] = glyphs;
+    FT_Done_Face(face);
+    
+    const char* type_name = (type == FontType::DEFAULT) ? "DEFAULT" : 
+                           (type == FontType::DIGITAL) ? "DIGITAL" : "ICONS";
+    std::cout << "✅ Font loaded: " << type_name << " (" << size << "px)" << std::endl;
     return true;
 }
 
@@ -394,26 +500,7 @@ bool Renderer::initialize() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_DEPTH_TEST);
 
-    // Font Setup
-    int scaled_font_size = (int)(32 * render_scale);
-    const char* font_paths[] = {
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-        "/usr/share/fonts/TTF/DejaVuSans.ttf",
-        "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"
-    };
-    
-    bool font_loaded = false;
-    for (const char* path : font_paths) {
-        if (setup_font(path, scaled_font_size)) {
-            font_loaded = true;
-            break;
-        }
-    }
-    
-    if (!font_loaded) {
-        std::cerr << "⚠️  No font loaded" << std::endl;
-    }
-
+    // Fonts werden lazy bei Bedarf geladen
     eglSwapInterval(egl_display, 1);
     return true;
 }
@@ -496,6 +583,32 @@ void Renderer::draw_rect(float x, float y, float w, float h, const Color& color)
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
+void Renderer::draw_rect_inverted(float x, float y, float w, float h) {
+    // Invert BlendMode für Rect-Overlay
+    glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ZERO);
+    
+    glUseProgram(shader_program_solid);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+    GLint screen_loc = glGetUniformLocation(shader_program_solid, "screen_size");
+    glUniform2f(screen_loc, (float)render_width, (float)render_height);
+
+    GLint rect_loc = glGetUniformLocation(shader_program_solid, "rect");
+    glUniform4f(rect_loc, x, y, w, h);
+
+    GLint color_loc = glGetUniformLocation(shader_program_solid, "color");
+    glUniform4f(color_loc, 1.0f, 1.0f, 1.0f, 1.0f);
+
+    GLint pos_loc = glGetAttribLocation(shader_program_solid, "position");
+    glEnableVertexAttribArray(pos_loc);
+    glVertexAttribPointer(pos_loc, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    
+    // Restore normal blend mode
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
+
 void Renderer::draw_dithered(float x, float y, float w, float h, const Color& color, float dot_alpha) {
     glUseProgram(shader_program_dither);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -519,8 +632,17 @@ void Renderer::draw_dithered(float x, float y, float w, float h, const Color& co
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
-void Renderer::draw_text(const std::string& text, float x, float y, const Color& color) {
-    if (glyphs.empty()) return;
+void Renderer::draw_text(const std::string& text, float x, float y, const Color& color,
+                         FontType font, int size) {
+    std::map<char, Glyph>* glyphs = get_font_glyphs(font, size);
+    if (!glyphs || glyphs->empty()) return;
+    
+    FontMetrics* metrics = get_font_metrics(font, size);
+    if (!metrics) return;
+    
+    // Adjust y to position text with top-left origin
+    // y is now the TOP of the text bounding box
+    float baseline_y = y + metrics->ascender;
     
     glUseProgram(shader_program_text);
     glActiveTexture(GL_TEXTURE0);
@@ -534,13 +656,28 @@ void Renderer::draw_text(const std::string& text, float x, float y, const Color&
     GLint tex_loc = glGetUniformLocation(shader_program_text, "tex");
     glUniform1i(tex_loc, 0);
     
-    for (char c : text) {
-        if (glyphs.find(c) == glyphs.end()) continue;
+    // UTF-8 parsing: detect 3-byte sequences for icon glyphs
+    for (size_t i = 0; i < text.length(); ) {
+        char c = text[i];
         
-        Glyph& glyph = glyphs[c];
+        // Check for UTF-8 3-byte sequence (0xEE 0xA0 0x8X for Private Use Area)
+        if (i + 2 < text.length() &&
+            (unsigned char)text[i] == 0xEE &&
+            (unsigned char)text[i+1] == 0xA0 &&
+            ((unsigned char)text[i+2] & 0x80) == 0x80) {
+            // Extract third byte as glyph key
+            c = text[i+2];
+            i += 3;
+        } else {
+            i++;
+        }
+        
+        if (glyphs->find(c) == glyphs->end()) continue;
+        
+        Glyph& glyph = (*glyphs)[c];
         
         float xpos = x + glyph.bearing_x;
-        float ypos = y - (glyph.height - glyph.bearing_y);
+        float ypos = baseline_y - glyph.bearing_y;
         float w = glyph.width;
         float h = glyph.height;
         
@@ -600,13 +737,157 @@ void Renderer::draw_text(const std::string& text, float x, float y, const Color&
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Renderer::cleanup() {
-    for (auto& pair : glyphs) {
-        glDeleteTextures(1, &pair.second.texture_id);
+void Renderer::draw_text_inverted(const std::string& text, float x, float y,
+                                   FontType font, int size) {
+    std::map<char, Glyph>* glyphs = get_font_glyphs(font, size);
+    if (!glyphs || glyphs->empty()) return;
+    
+    FontMetrics* metrics = get_font_metrics(font, size);
+    if (!metrics) return;
+    
+    // Adjust y to position text with top-left origin
+    float baseline_y = y + metrics->ascender;
+    
+    // Invert BlendMode: Text invertiert Hintergrund
+    glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ZERO);
+    
+    glUseProgram(shader_program_text);
+    glActiveTexture(GL_TEXTURE0);
+    
+    GLint screen_loc = glGetUniformLocation(shader_program_text, "screen_size");
+    glUniform2f(screen_loc, (float)render_width, (float)render_height);
+    
+    // Weiße Farbe für Invert-Effekt
+    GLint color_loc = glGetUniformLocation(shader_program_text, "color");
+    glUniform4f(color_loc, 1.0f, 1.0f, 1.0f, 1.0f);
+    
+    GLint tex_loc = glGetUniformLocation(shader_program_text, "tex");
+    glUniform1i(tex_loc, 0);
+    
+    // UTF-8 parsing: detect 3-byte sequences for icon glyphs
+    for (size_t i = 0; i < text.length(); ) {
+        char c = text[i];
+        
+        // Check for UTF-8 3-byte sequence (0xEE 0xA0 0x8X for Private Use Area)
+        if (i + 2 < text.length() &&
+            (unsigned char)text[i] == 0xEE &&
+            (unsigned char)text[i+1] == 0xA0 &&
+            ((unsigned char)text[i+2] & 0x80) == 0x80) {
+            // Extract third byte as glyph key
+            c = text[i+2];
+            i += 3;
+        } else {
+            i++;
+        }
+        
+        if (glyphs->find(c) == glyphs->end()) continue;
+        
+        Glyph& glyph = (*glyphs)[c];
+        
+        float xpos = x + glyph.bearing_x;
+        float ypos = baseline_y - glyph.bearing_y;
+        float w = glyph.width;
+        float h = glyph.height;
+        
+        float u0, v0, u1, v1, u2, v2, u3, v3;
+        
+        switch (display_rotation) {
+            case 0:
+                u0 = 0.0f; v0 = 0.0f; u1 = 1.0f; v1 = 0.0f;
+                u2 = 1.0f; v2 = 1.0f; u3 = 0.0f; v3 = 1.0f;
+                break;
+            case 90:
+                u0 = 1.0f; v0 = 0.0f; u1 = 1.0f; v1 = 1.0f;
+                u2 = 0.0f; v2 = 1.0f; u3 = 0.0f; v3 = 0.0f;
+                break;
+            case 180:
+                u0 = 1.0f; v0 = 1.0f; u1 = 0.0f; v1 = 1.0f;
+                u2 = 0.0f; v2 = 0.0f; u3 = 1.0f; v3 = 0.0f;
+                break;
+            case 270:
+                u0 = 0.0f; v0 = 1.0f; u1 = 0.0f; v1 = 0.0f;
+                u2 = 1.0f; v2 = 0.0f; u3 = 1.0f; v3 = 1.0f;
+                break;
+            default:
+                u0 = 0.0f; v0 = 0.0f; u1 = 1.0f; v1 = 0.0f;
+                u2 = 1.0f; v2 = 1.0f; u3 = 0.0f; v3 = 1.0f;
+                break;
+        }
+        
+        float vertices[6][4] = {
+            { xpos,     ypos + h,   u3, v3 },
+            { xpos,     ypos,       u0, v0 },
+            { xpos + w, ypos,       u1, v1 },
+            { xpos,     ypos + h,   u3, v3 },
+            { xpos + w, ypos,       u1, v1 },
+            { xpos + w, ypos + h,   u2, v2 }
+        };
+        
+        glBindTexture(GL_TEXTURE_2D, glyph.texture_id);
+        glBindBuffer(GL_ARRAY_BUFFER, text_vbo);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+        
+        GLint pos_loc = glGetAttribLocation(shader_program_text, "position");
+        GLint tex_loc_attr = glGetAttribLocation(shader_program_text, "texcoord");
+        
+        glEnableVertexAttribArray(pos_loc);
+        glVertexAttribPointer(pos_loc, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+        
+        glEnableVertexAttribArray(tex_loc_attr);
+        glVertexAttribPointer(tex_loc_attr, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 
+                            (void*)(2 * sizeof(float)));
+        
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        
+        x += glyph.advance;
     }
     
-    if (ft_face) FT_Done_Face(ft_face);
-    if (ft_library) FT_Done_FreeType(ft_library);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    
+    // BlendMode zurücksetzen
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
+
+float Renderer::get_text_width(const std::string& text, FontType font, int size) {
+    std::map<char, Glyph>* glyphs = get_font_glyphs(font, size);
+    if (!glyphs || glyphs->empty()) return 0.0f;
+    
+    float width = 0.0f;
+    
+    // UTF-8 parsing: same logic as draw_text
+    for (size_t i = 0; i < text.length(); ) {
+        char c = text[i];
+        
+        // Check for UTF-8 3-byte sequence
+        if (i + 2 < text.length() &&
+            (unsigned char)text[i] == 0xEE &&
+            (unsigned char)text[i+1] == 0xA0 &&
+            ((unsigned char)text[i+2] & 0x80) == 0x80) {
+            c = text[i+2];
+            i += 3;
+        } else {
+            i++;
+        }
+        
+        if (glyphs->find(c) == glyphs->end()) continue;
+        width += (*glyphs)[c].advance;
+    }
+    
+    return width;
+}
+
+void Renderer::cleanup() {
+    for (auto& cache_entry : font_cache) {
+        for (auto& glyph_pair : cache_entry.second) {
+            glDeleteTextures(1, &glyph_pair.second.texture_id);
+        }
+    }
+    font_cache.clear();
+    
+    if (ft_initialized && ft_library) {
+        FT_Done_FreeType(ft_library);
+        ft_initialized = false;
+    }
     
     if (waiting_for_flip) {
         drmEventContext ev_ctx;

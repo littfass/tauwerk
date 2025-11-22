@@ -15,6 +15,7 @@ class Renderer;
 class Button : public Widget {
 private:
     std::string text;
+    std::string name;
     bool is_pressed;
     bool latch_state;
     ButtonMode mode;
@@ -31,8 +32,10 @@ public:
            ButtonMode mode = ButtonMode::MOMENTARY);
     
     void set_text(const std::string& t);
+    void set_name(const std::string& n);
     void set_on_click(std::function<void()> callback);
     void set_mode(ButtonMode m);
+    const std::string& get_name() const { return name; }
     
     bool is_pressed_state() const { return is_pressed; }
     bool get_latch_state() const { return latch_state; }
